@@ -92,7 +92,7 @@ IF(NOT CMAKE_SYSTEM_PROCESSOR)
       "cpuinfo will compile, but cpuinfo_initialize() will always fail.")
     SET(CPUINFO_SUPPORTED_PLATFORM FALSE)
   ENDIF()
-ELSEIF(NOT CPUINFO_TARGET_PROCESSOR MATCHES "^(i[3-6]86|AMD64|x86(_64)?|armv[5-8].*|aarch64|arm64.*|ARM64.*)$")
+ELSEIF(NOT CPUINFO_TARGET_PROCESSOR MATCHES "^(i[3-6]86|AMD64|x86(_64)?|armv[5-8].*|aarch64|arm64.*|ARM64.*|ppc64le)$")
   MESSAGE(WARNING
     "Target processor architecture \"${CPUINFO_TARGET_PROCESSOR}\" is not supported in cpuinfo. "
     "cpuinfo will compile, but cpuinfo_initialize() will always fail.")
@@ -210,6 +210,16 @@ IF(CPUINFO_SUPPORTED_PLATFORM)
       LIST(APPEND CPUINFO_SRCS
         src/arm/android/properties.c)
     ENDIF()
+  ELSEIF(CPUINFO_TARGET_PROCESSOR MATCHES "^(ppc64le)$" AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    LIST(APPEND CPUINFO_SRCS
+      src/powerpc/uarch.c
+      src/powerpc/cache.c
+      src/powerpc/linux/init.c
+      src/powerpc/linux/cpuinfo.c
+      src/powerpc/linux/clusters.c
+      src/powerpc/linux/chipset.c
+      src/powerpc/linux/ppc64-isa.c
+      src/powerpc/linux/hwcap.c)
   ENDIF()
 
   IF(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")

@@ -16,7 +16,6 @@
 #include <linux/api.h>
 #include <cpuinfo/log.h>
 
-
 bool cpuinfo_linux_parse_small_file(const char* filename, size_t buffer_size, cpuinfo_smallfile_callback callback, void* context) {
 	int file = -1;
 	bool status = false;
@@ -55,6 +54,7 @@ bool cpuinfo_linux_parse_small_file(const char* filename, size_t buffer_size, cp
 		}
 	} while (bytes_read != 0);
 
+	// cpuinfo_log_debug("small file parse from '%s', string: '%s'",filename, buffer);
 	status = callback(buffer, &buffer[buffer_position], context);
 
 cleanup:

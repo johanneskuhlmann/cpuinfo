@@ -202,6 +202,8 @@ bool cpuinfo_linux_parse_cpulist(const char* filename, cpuinfo_cpulist_callback 
 	} while (bytes_read != 0);
 
 cleanup:
+	// cpuinfo_log_debug("parse cpu list from '%s', string: '%s'",filename, buffer);
+
 	if (file != -1) {
 #if CPUINFO_MOCK
 		cpuinfo_mock_close(file);

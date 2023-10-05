@@ -77,13 +77,16 @@ inline static bool is_whitespace(char c) {
 	#else
 		static const uint32_t default_max_processors_count = 32;
 	#endif
+#elif CPUINFO_ARCH_PPC64
+	// not defined on ppc64
+	static const uint32_t default_max_processors_count = 2048;
 #else
 	static const uint32_t default_max_processors_count = CPU_SETSIZE;
 #endif
 
 static bool uint32_parser(const char* text_start, const char* text_end, void* context) {
 	if (text_start == text_end) {
-		cpuinfo_log_error("failed to parse file %s: file is empty", KERNEL_MAX_FILENAME);
+		cpuinfo_log_error("failed to parse file: file is empty");
 		return false;
 	}
 
@@ -105,6 +108,34 @@ static bool uint32_parser(const char* text_start, const char* text_end, void* co
 
 	uint32_t* kernel_max_ptr = (uint32_t*) context;
 	*kernel_max_ptr = kernel_max;
+	return true;
+}
+
+static bool int32_parser(const char* text_start, const char* text_end, void* context) {
+	if (text_start == text_end) {
+		cpuinfo_log_error("failed to parse file: file is empty");
+		return false;
+	}
+
+	uint32_t number = 0;
+	// bool isNegative=false;
+	const char* parsed_end = parse_number(text_start, text_end, &number);
+	if (parsed_end == text_start && *text_start=='-' && *(text_start+1)=='1') {
+		// parsed_end = parse_number(text_start+1, text_end, &number);
+		// isNegative=true;
+		number = 0;
+	} else {
+		for (const char* char_ptr = parsed_end; char_ptr != text_end; char_ptr++) {
+			if (!is_whitespace(*char_ptr)) {
+				cpuinfo_log_warning("non-whitespace characters \"%.*s\" following number in file %s are ignored",
+					(int) (text_end - char_ptr), char_ptr, KERNEL_MAX_FILENAME);
+				break;
+			}
+		}
+	}
+
+	uint32_t* number_ptr = (uint32_t*) context;
+	*number_ptr = number; // isNegative?-number:number;
 	return true;
 }
 
@@ -140,7 +171,7 @@ uint32_t cpuinfo_linux_get_processor_max_frequency(uint32_t processor) {
 			max_frequency, processor, max_frequency_filename);
 		return max_frequency;
 	} else {
-		cpuinfo_log_warning("failed to parse max frequency for processor %"PRIu32" from %s",
+		cpuinfo_log_info("failed to parse max frequency for processor %"PRIu32" from %s",
 			processor, max_frequency_filename);
 		return 0;
 	}
@@ -172,7 +203,7 @@ uint32_t cpuinfo_linux_get_processor_min_frequency(uint32_t processor) {
 }
 
 bool cpuinfo_linux_get_processor_core_id(uint32_t processor, uint32_t core_id_ptr[restrict static 1]) {
-	char core_id_filename[PACKAGE_ID_FILENAME_SIZE];
+	char core_id_filename[CORE_ID_FILENAME_SIZE];
 	const int chars_formatted = snprintf(
 		core_id_filename, CORE_ID_FILENAME_SIZE, CORE_ID_FILENAME_FORMAT, processor);
 	if ((unsigned int) chars_formatted >= CORE_ID_FILENAME_SIZE) {
@@ -199,11 +230,11 @@ bool cpuinfo_linux_get_processor_package_id(uint32_t processor, uint32_t package
 		package_id_filename, PACKAGE_ID_FILENAME_SIZE, PACKAGE_ID_FILENAME_FORMAT, processor);
 	if ((unsigned int) chars_formatted >= PACKAGE_ID_FILENAME_SIZE) {
 		cpuinfo_log_warning("failed to format filename for package id of processor %"PRIu32, processor);
-		return 0;
+		return false;
 	}
 
 	uint32_t package_id;
-	if (cpuinfo_linux_parse_small_file(package_id_filename, PACKAGE_ID_FILESIZE, uint32_parser, &package_id)) {
+	if (cpuinfo_linux_parse_small_file(package_id_filename, PACKAGE_ID_FILESIZE, int32_parser, &package_id)) {
 		cpuinfo_log_debug("parsed package id value of %"PRIu32" for logical processor %"PRIu32" from %s",
 			package_id, processor, package_id_filename);
 		*package_id_ptr = package_id;

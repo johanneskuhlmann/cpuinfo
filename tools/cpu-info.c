@@ -281,6 +281,18 @@ static const char* uarch_to_string(enum cpuinfo_uarch uarch) {
 			return "Dhyana";
 		case cpuinfo_uarch_taishan_v110:
 			return "TaiShan v110";
+		case cpuinfo_uarch_power7:
+			return "POWER7";
+		case cpuinfo_uarch_power7p:
+			return "POWER7+";
+		case cpuinfo_uarch_power8:
+			return "POWER8";
+		case cpuinfo_uarch_power8e:
+			return "POWER8E";
+		case cpuinfo_uarch_power8nvl:
+			return "POWER8NVL";
+		case cpuinfo_uarch_power9:
+			return "POWER9";
 		default:
 			return NULL;
 	}
@@ -313,6 +325,8 @@ int main(int argc, char** argv) {
 	printf("Cores:\n");
 	for (uint32_t i = 0; i < cpuinfo_get_cores_count(); i++) {
 		const struct cpuinfo_core* core = cpuinfo_get_core(i);
+		if (core->disabled)
+			continue;
 		if (core->processor_count == 1) {
 			printf("\t%"PRIu32": 1 processor (%"PRIu32")", i, core->processor_start);
 		} else {

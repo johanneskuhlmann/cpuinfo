@@ -12,10 +12,10 @@ int main(int argc, char** argv) {
 #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
 
 	printf("Scalar instructions:\n");
-#if CPUINFO_ARCH_X86
+	#if CPUINFO_ARCH_X86
 		printf("\tx87 FPU: %s\n", cpuinfo_has_x86_fpu() ? "yes" : "no");
 		printf("\tCMOV: %s\n", cpuinfo_has_x86_cmov() ? "yes" : "no");
-#endif
+	#endif
 		printf("\tLAHF/SAHF: %s\n", cpuinfo_has_x86_lahf_sahf() ? "yes" : "no");
 		printf("\tLZCNT: %s\n", cpuinfo_has_x86_lzcnt() ? "yes" : "no");
 		printf("\tPOPCNT: %s\n", cpuinfo_has_x86_popcnt() ? "yes" : "no");
@@ -77,9 +77,9 @@ int main(int argc, char** argv) {
 	printf("Multi-threading extensions:\n");
 		printf("\tMONITOR/MWAIT: %s\n", cpuinfo_has_x86_mwait() ? "yes" : "no");
 		printf("\tMONITORX/MWAITX: %s\n", cpuinfo_has_x86_mwaitx() ? "yes" : "no");
-#if CPUINFO_ARCH_X86
+	#if CPUINFO_ARCH_X86
 		printf("\tCMPXCHG8B: %s\n", cpuinfo_has_x86_cmpxchg8b() ? "yes" : "no");
-#endif
+	#endif
 		printf("\tCMPXCHG16B: %s\n", cpuinfo_has_x86_cmpxchg16b() ? "yes" : "no");
 		printf("\tHLE: %s\n", cpuinfo_has_x86_hle() ? "yes" : "no");
 		printf("\tRTM: %s\n", cpuinfo_has_x86_rtm() ? "yes" : "no");
@@ -99,9 +99,9 @@ int main(int argc, char** argv) {
 
 
 	printf("Profiling instructions:\n");
-#if CPUINFO_ARCH_X86
+	#if CPUINFO_ARCH_X86
 		printf("\tRDTSC: %s\n", cpuinfo_has_x86_rdtsc() ? "yes" : "no");
-#endif
+	#endif
 		printf("\tRDTSCP: %s\n", cpuinfo_has_x86_rdtscp() ? "yes" : "no");
 		printf("\tMPX: %s\n", cpuinfo_has_x86_mpx() ? "yes" : "no");
 
@@ -112,6 +112,7 @@ int main(int argc, char** argv) {
 		printf("\tXSAVE/XSTOR: %s\n", cpuinfo_has_x86_xsave() ? "yes" : "no");
 
 #endif /* CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64 */
+
 
 #if CPUINFO_ARCH_ARM
 	printf("Instruction sets:\n");
@@ -178,4 +179,23 @@ int main(int argc, char** argv) {
 		printf("\tCRC32: %s\n", cpuinfo_has_arm_crc32() ? "yes" : "no");
 #endif
 
+
+#if CPUINFO_ARCH_PPC64
+	printf("Instruction sets:\n");
+		// printf("\tPOWER ISA v3.0: %s\n", cpuinfo_has_powerpc_30() ? "yes" : "no");
+
+	printf("SIMD extensions:\n");
+		printf("\tPPC64 VSX: %s\n", cpuinfo_has_powerpc_vsx() ? "yes" : "no");
+		printf("\tPPC64 VMX: %s\n", cpuinfo_has_powerpc_vmx() ? "yes" : "no");
+		printf("\tPPC64 HTM: %s\n", cpuinfo_has_powerpc_htm() ? "yes" : "no");
+
+	printf("Cryptography extensions:\n");
+
+
+#include <inttypes.h>
+	printf("Micro-Arch: %"PRIu32"\n", cpuinfo_get_core(0)->uarch);
+	// printf("Linux CPU list: %s\n", cpuinfo_linux_parse_cpulist());
+	printf("#Threads: %"PRIu32"\n", cpuinfo_get_processors_count());
+	cpuinfo_deinitialize();
+#endif
 }
